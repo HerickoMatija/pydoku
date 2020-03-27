@@ -14,29 +14,36 @@ def printBoard(board):
             print("+---+---+---+")
 
 def solveSudoku(board):
-    currentEmptyPosition = findNextEmptySpace(board)
+    solveSudokuHelper(board, 0, 0)
 
-    if currentEmptyPosition is None:
-        return True
-
+def solveSudokuHelper(board, row, column):
+    if board[row][column] != 0:
+        if column == len(board[row]) - 1 and row == len(board) - 1:
+            return True
+        else:
+            if column == len(board[row]) - 1:
+                return solveSudokuHelper(board, row + 1, 0)
+            else:
+                return solveSudokuHelper(board, row, column + 1)
+    
     for candidateNumber in range(1,10):
-        if isValid(candidateNumber, currentEmptyPosition[0], currentEmptyPosition[1], board):
-            board[currentEmptyPosition[0]][currentEmptyPosition[1]] = candidateNumber
+        if isValid(candidateNumber, row, column, board):
+            board[row][column] = candidateNumber
 
-            if solveSudoku(board):
+            if column == len(board[row]) - 1 and row == len(board) - 1:
+                return True
+            else:                
+                if column == len(board[row]) - 1:
+                    result = solveSudokuHelper(board, row + 1, 0)
+                else:
+                    result = solveSudokuHelper(board, row, column + 1)
+
+            if result:
                 return True
             
-            board[currentEmptyPosition[0]][currentEmptyPosition[1]] = 0
+            board[row][column] = 0
 
     return False
-
-def findNextEmptySpace(board):
-    for row in range(len(board)):
-        for column in range(len(board[row])):
-            if board[row][column] == 0:
-                return (row, column)
-    
-    return None
 
 def isValid(number, row, column, board):
     for boardRow in range(9):        
@@ -85,3 +92,13 @@ solved = [
 
 solveSudoku(board)
 printBoard(board)
+
+def isSolved(board, solved):
+    for row in range(len(board)):
+        for column in range(len(board[row])):
+            if board[row][column] != solved[row][column]:
+                return False
+    
+    return True
+
+print(isSolved(board, solved))
