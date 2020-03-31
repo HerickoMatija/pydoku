@@ -18,6 +18,7 @@ class PydokuGUI:
     def __init__(self):
         self.screen = pygame.display.set_mode((self.WIDTH, self.WIDTH))
         pygame.display.set_caption('Pydoku GUI')
+        self.selectedCell = None
         self.board = [
             [0, 0, 9, 2, 1, 8, 0, 0, 0],
             [1, 7, 0, 0, 9, 6, 8, 0, 0],
@@ -78,6 +79,19 @@ class PydokuGUI:
 
         self.screen.blit(text, textRect)
 
+    def setSelectedCell(self, mouseClickPosition):
+        row = self.getCellFromCoord(mouseClickPosition[1])
+        column = self.getCellFromCoord(mouseClickPosition[0])
+        if row != -1 and column != -1:
+            self.selectedCell = (column, row)
+
+    def getCellFromCoord(self, coordinate):
+        for idx, cellCenter in enumerate(self.cellCenters):
+            if cellCenter - 20 < coordinate and coordinate < cellCenter + 20:
+                return idx
+
+        return -1
+
 
 # Create a new Pydoku GUI
 pydoku = PydokuGUI()
@@ -88,6 +102,10 @@ while running:
 
     # Handle events
     for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONUP:
+            pos = pygame.mouse.get_pos()
+            pydoku.setSelectedCell(pos)
+
         if event.type == pygame.QUIT:
             running = False
 
