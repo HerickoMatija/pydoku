@@ -8,38 +8,85 @@ pygame.init()
 font = pygame.font.SysFont('Monospace', 32)
 
 
+class PydokuCell:
+
+    def __init__(self, number):
+        self.number = number
+        self.editable = number == 0
+        self.invalid = False
+        self.selected = False
+
+
 class PydokuGUI:
 
     # colors that are used
     COLOR_BLACK = (0, 0, 0)
+    COLOR_RED = (255, 0, 0)
     COLOR_GREY = (105, 105, 105)
     COLOR_WHITE = (255, 255, 255)
     COLOR_GREEN = (0, 255, 0)
     COLOR_LIGHT_BLUE = (0, 180, 255)
 
+    # Static width calculation based on 9 cells, 6 normal lines and 2 thicker lines
     WIDTH = 9 * 39 + 6 * 1 + 2 * 3
+    # Helper array to have access to the center of the cells
     cellCenters = [20, 60, 100, 142, 182, 222, 264, 304, 344]
 
     def __init__(self):
         self.screen = pygame.display.set_mode((self.WIDTH, self.WIDTH))
         pygame.display.set_caption('Pydoku GUI')
-        self.selectedCell = None       
+        self.selectedCell = None
         self.board = [
-            [(0, True), (0, True), (9, False), (2, False), (1, False), (8,False), (0, True), (0, True), (0, True)],
-            [(1, False), (7, False), (0, True), (0, True), (9, False), (6, False), (8, False), (0, True), (0, True)],
-            [(0, True), (4, False), (0, True), (0, True), (5, False), (0, True), (0, True), (0, True), (6, False)],
-            [(4, False), (5, False), (1, False), (0, True), (6, False), (0, True), (3, False), (7, False), (0, True)],
-            [(0, True), (0, True), (0, True), (0, True), (0, True), (5, False), (0, True), (0, True), (9, False)],
-            [(9, False), (0, True), (2, False), (3, False), (7, False), (0, True), (5, False), (0, True), (0, True)],
-            [(6, False), (0, True), (0, True), (5, False), (0, True), (1, False), (0, True), (0, True), (0, True)],
-            [(0, True), (0, True), (0, True), (0, True), (4, False), (9, False), (2, False), (5, False), (7, False)],
-            [(0, True), (9, False), (4, False), (8, False), (0, True), (0, True), (0, True), (1, False), (3, False)],
+            [
+                PydokuCell(0), PydokuCell(0), PydokuCell(9),
+                PydokuCell(2), PydokuCell(1), PydokuCell(8),
+                PydokuCell(0), PydokuCell(0), PydokuCell(0)
+            ],
+            [
+                PydokuCell(1), PydokuCell(7), PydokuCell(0),
+                PydokuCell(0), PydokuCell(9), PydokuCell(6),
+                PydokuCell(8), PydokuCell(0), PydokuCell(0)
+            ],
+            [
+                PydokuCell(0), PydokuCell(4), PydokuCell(0),
+                PydokuCell(0), PydokuCell(5), PydokuCell(0),
+                PydokuCell(0), PydokuCell(0), PydokuCell(6)
+            ],
+            [
+                PydokuCell(4), PydokuCell(5), PydokuCell(1),
+                PydokuCell(0), PydokuCell(6), PydokuCell(0),
+                PydokuCell(3), PydokuCell(7), PydokuCell(0)
+            ],
+            [
+                PydokuCell(0), PydokuCell(0), PydokuCell(0),
+                PydokuCell(0), PydokuCell(0), PydokuCell(5),
+                PydokuCell(0), PydokuCell(0), PydokuCell(9)
+            ],
+            [
+                PydokuCell(9), PydokuCell(0), PydokuCell(2),
+                PydokuCell(3), PydokuCell(7), PydokuCell(0),
+                PydokuCell(5), PydokuCell(0), PydokuCell(0)
+            ],
+            [
+                PydokuCell(6), PydokuCell(0), PydokuCell(0),
+                PydokuCell(5), PydokuCell(0), PydokuCell(1),
+                PydokuCell(0), PydokuCell(0), PydokuCell(0)
+            ],
+            [
+                PydokuCell(0), PydokuCell(0), PydokuCell(0),
+                PydokuCell(0), PydokuCell(4), PydokuCell(9),
+                PydokuCell(2), PydokuCell(5), PydokuCell(7)
+            ],
+            [
+                PydokuCell(0), PydokuCell(9), PydokuCell(4),
+                PydokuCell(8), PydokuCell(0), PydokuCell(0),
+                PydokuCell(0), PydokuCell(1), PydokuCell(3)
+            ]
         ]
 
     def drawBoard(self):
         self.drawLines()
         self.drawNumbers()
-        self.drawSelected()
 
     def drawLines(self):
         # Fill the background
@@ -70,12 +117,22 @@ class PydokuGUI:
         # Go through the board and draw the numbers into the cells
         for row in range(len(self.board)):
             for column in range(len(self.board[row])):
+
                 cell = self.board[row][column]
-                if cell[0] != 0:
-                    color = self.COLOR_GREY if cell[1] else self.COLOR_BLACK
-                    self.drawNumber(cell[0],
-                                    self.cellCenters[column],
-                                    self.cellCenters[row],
+                cellCenterY = self.cellCenters[row]
+                cellCenterX = self.cellCenters[column]
+
+                if cell.number != 0:
+                    color = self.COLOR_GREY if cell.editable else self.COLOR_BLACK
+                    self.drawNumber(cell.number,
+                                    cellCenterX,
+                                    cellCenterY,
+                                    color)
+
+                if cell.selected or cell.invalid:
+                    color = self.COLOR_RED if cell.invalid else self.COLOR_LIGHT_BLUE
+                    self.markSquare(cellCenterX,
+                                    cellCenterY,
                                     color)
 
     def drawNumber(self, number, centerX, centerY, color):
@@ -90,15 +147,6 @@ class PydokuGUI:
         textRect.center = (centerX, centerY)
 
         self.screen.blit(text, textRect)
-
-    def drawSelected(self):
-        if self.selectedCell is None:
-            return
-
-        rowCenter = self.cellCenters[self.selectedCell[0]]
-        columnCenter = self.cellCenters[self.selectedCell[1]]
-
-        self.markSquare(columnCenter, rowCenter, self.COLOR_LIGHT_BLUE)
 
     def markSquare(self, columnCenter, rowCenter, color):
         self.drawLine((columnCenter - 20, rowCenter - 20),
@@ -121,8 +169,12 @@ class PydokuGUI:
         clickedColumn = self.getCellFromCoord(mouseClickPosition[0])
         clickedRow = self.getCellFromCoord(mouseClickPosition[1])
 
-        if clickedRow >= 0 and clickedColumn >= 0:
-            self.selectedCell = (clickedRow, clickedColumn)
+        if self.selectedCell is not None:
+            row, column = self.selectedCell
+            self.board[row][column].selected = False
+
+        self.selectedCell = (clickedRow, clickedColumn)
+        self.board[clickedRow][clickedColumn].selected = True
 
     def getCellFromCoord(self, coordinate):
         for idx, cellCenter in enumerate(self.cellCenters):
@@ -135,33 +187,85 @@ class PydokuGUI:
         if self.selectedCell is None:
             return
 
-        cell = self.board[self.selectedCell[0]][self.selectedCell[1]]
+        row, column = self.selectedCell
+        cell = self.board[row][column]
 
-        if cell[1]:
-            self.board[self.selectedCell[0]][self.selectedCell[1]] = (number, True)
+        if cell.editable:
+            self.resetValidation()
+            cell.number = number
+            if number != 0:
+                self.validateSelectedCellNumber()
 
     def delete(self):
         if self.selectedCell is None:
             return
-
-        cell = self.board[self.selectedCell[0]][self.selectedCell[1]]
-
-        if cell[1]:
-            self.board[self.selectedCell[0]][self.selectedCell[1]] = (0, True)
+        self.setNumber(0)
 
     def moveSelectedCell(self, rowMove, columnMove):
         if self.selectedCell is None:
             return
 
-        newRow = self.selectedCell[0] + rowMove
-        newColumn = self.selectedCell[1] + columnMove
+        oldRow, oldColumn = self.selectedCell
+
+        newRow = oldRow + rowMove
+        newColumn = oldColumn + columnMove
 
         if -1 < newRow and newRow < 9 and -1 < newColumn and newColumn < 9:
             self.selectedCell = (newRow, newColumn)
+            self.board[oldRow][oldColumn].selected = False
+            self.board[newRow][newColumn].selected = True
+
+    def validateSelectedCellNumber(self):
+        if self.selectedCell is None:
+            return
+
+        selectedRow, selectedColumn = self.selectedCell
+        self.traverseSignificantCellsAndSetInvalidTo(selectedRow,
+                                                     selectedColumn,
+                                                     True)
+
+    def resetValidation(self):
+        if self.selectedCell is None:
+            return
+
+        selectedRow, selectedColumn = self.selectedCell
+        self.traverseSignificantCellsAndSetInvalidTo(selectedRow,
+                                                     selectedColumn,
+                                                     False)
+
+    def traverseSignificantCellsAndSetInvalidTo(self, row, column, invalid):
+        cell = self.board[row][column]
+
+        for idx in range(9):
+            currentCell = self.board[idx][column]
+
+            if currentCell.number == cell.number and row != idx:
+                cell.invalid = invalid
+                currentCell.invalid = invalid
+
+            currentCell = self.board[row][idx]
+
+            if currentCell.number == cell.number and column != idx:
+                cell.invalid = invalid
+                currentCell.invalid = invalid
+
+        startingRow = (row // 3) * 3
+        startingColumn = (column // 3) * 3
+
+        for currentRow in range(startingRow, startingRow + 3):
+            for currentColumn in range(startingColumn, startingColumn + 3):
+
+                currentCell = self.board[currentRow][currentColumn]
+
+                if currentCell.number == cell.number:
+                    if row != currentRow and column != currentColumn:
+                        cell.invalid = invalid
+                        currentCell.invalid = invalid
 
 
 # Create a new Pydoku GUI
 pydoku = PydokuGUI()
+pydoku.drawBoard()
 
 # Set containing the allowed inputs
 ALLOWED_INPUTS = {pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
@@ -187,15 +291,16 @@ while running:
                 pydoku.moveSelectedCell(0, 1)
             elif event.key == pygame.K_LEFT:
                 pydoku.moveSelectedCell(0, -1)
+            # Draw the actual board
+            pydoku.drawBoard()
         if event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
             pydoku.setSelectedCell(pos)
+            # Draw the actual board
+            pydoku.drawBoard()
 
         if event.type == pygame.QUIT:
             running = False
-
-    # Draw the actual board
-    pydoku.drawBoard()
 
     # Flip the display
     pygame.display.flip()
