@@ -124,28 +124,19 @@ class PydokuGUI:
             for column in range(len(self.board[row])):
 
                 cell = self.board[row][column]
-                cellCenterY = self.cellCenters[row]
-                cellCenterX = self.cellCenters[column]
 
                 if cell.number != 0:
                     color = self.COLOR_GREY if cell.editable else self.COLOR_BLACK
-                    self.drawNumber(cell.number,
-                                    cellCenterX,
-                                    cellCenterY,
-                                    color)
+                    self.drawNumber(cell.number, row, column, color)
 
                 if cell.selected or cell.invalid:
                     color = self.COLOR_RED if cell.invalid else self.COLOR_LIGHT_BLUE
-                    self.markSquare(cellCenterX,
-                                    cellCenterY,
-                                    color)
+                    self.colorCellBorder(row, column, color)
 
                 if cell.underConsideration:
-                    self.markSquare(cellCenterX,
-                                    cellCenterY,
-                                    self.COLOR_ORANGE)
+                    self.colorCellBorder(row, column, self.COLOR_ORANGE)
 
-    def drawNumber(self, number, centerX, centerY, color):
+    def drawNumber(self, number, row, column, color):
         text = font.render(str(number),
                            True,
                            color,
@@ -154,11 +145,14 @@ class PydokuGUI:
         textRect = text.get_rect()
 
         # set the center of the rectangular object.
-        textRect.center = (centerX, centerY)
+        textRect.center = (self.cellCenters[column], self.cellCenters[row])
 
         self.screen.blit(text, textRect)
 
-    def markSquare(self, columnCenter, rowCenter, color):
+    def colorCellBorder(self, row, column, color):
+        rowCenter = self.cellCenters[row]
+        columnCenter = self.cellCenters[column]
+
         self.drawLine((columnCenter - 20, rowCenter - 20),
                       (columnCenter + 20, rowCenter - 20),
                       color)
@@ -267,10 +261,9 @@ class PydokuGUI:
 
                 currentCell = self.board[currentRow][currentColumn]
 
-                if currentCell.number == cell.number:
-                    if row != currentRow and column != currentColumn:
-                        cell.invalid = invalid
-                        currentCell.invalid = invalid
+                if currentCell.number == cell.number and row != currentRow and column != currentColumn:
+                    cell.invalid = invalid
+                    currentCell.invalid = invalid
 
     def solveSudoku(self):
         self.solveSudokuHelper(0, 0)
@@ -299,7 +292,7 @@ class PydokuGUI:
         for candidateNumber in range(1, 10):
             currentCell.number = candidateNumber
             self.drawBoard()
-            time.sleep(0.1)
+            time.sleep(0.02)
             if self.isValid(candidateNumber, row, column):
 
                 if column == lastColumn and row == lastRow:
@@ -318,7 +311,7 @@ class PydokuGUI:
 
             currentCell.underConsideration = True
             self.drawBoard()
-            time.sleep(0.1)
+            time.sleep(0.02)
             currentCell.number = 0
 
         currentCell.underConsideration = False
@@ -345,46 +338,50 @@ class PydokuGUI:
         return True
 
 
-# Create a new Pydoku GUI
-pydoku = PydokuGUI()
-pydoku.drawBoard()
+def main():
+    # Create a new Pydoku GUI
+    pydoku = PydokuGUI()
+    pydoku.drawBoard()
 
-# Set containing the allowed inputs
-ALLOWED_INPUTS = {pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
-                  pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9}
+    # Set containing the allowed inputs
+    ALLOWED_INPUTS = {pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
+                      pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9}
 
-# Run until the user asks to quit
-running = True
-while running:
+    # Run until the user asks to quit
+    running = True
+    while running:
 
-    # Handle events
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key in ALLOWED_INPUTS:
-                number = int(chr(event.key))
-                pydoku.setNumber(number)
-            elif event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
-                pydoku.delete()
-            elif event.key == pygame.K_UP:
-                pydoku.moveSelectedCell(-1, 0)
-            elif event.key == pygame.K_DOWN:
-                pydoku.moveSelectedCell(1, 0)
-            elif event.key == pygame.K_RIGHT:
-                pydoku.moveSelectedCell(0, 1)
-            elif event.key == pygame.K_LEFT:
-                pydoku.moveSelectedCell(0, -1)
-            elif event.key == pygame.K_SPACE:
-                pydoku.solveSudoku()
-            # Draw the actual board
-            pydoku.drawBoard()
-        if event.type == pygame.MOUSEBUTTONUP:
-            pos = pygame.mouse.get_pos()
-            pydoku.setSelectedCell(pos)
-            # Draw the actual board
-            pydoku.drawBoard()
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key in ALLOWED_INPUTS:
+                    number = int(chr(event.key))
+                    pydoku.setNumber(number)
+                elif event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
+                    pydoku.delete()
+                elif event.key == pygame.K_UP:
+                    pydoku.moveSelectedCell(-1, 0)
+                elif event.key == pygame.K_DOWN:
+                    pydoku.moveSelectedCell(1, 0)
+                elif event.key == pygame.K_RIGHT:
+                    pydoku.moveSelectedCell(0, 1)
+                elif event.key == pygame.K_LEFT:
+                    pydoku.moveSelectedCell(0, -1)
+                elif event.key == pygame.K_SPACE:
+                    pydoku.solveSudoku()
+                # Draw the actual board
+                pydoku.drawBoard()
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                pydoku.setSelectedCell(pos)
+                # Draw the actual board
+                pydoku.drawBoard()
 
-        if event.type == pygame.QUIT:
-            running = False
+            if event.type == pygame.QUIT:
+                running = False
 
-# Done! Time to quit.
-pygame.quit()
+    # Done! Time to quit.
+    pygame.quit()
+
+
+main()
