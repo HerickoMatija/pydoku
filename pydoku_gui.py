@@ -1,5 +1,7 @@
 # Simple pygame program
 
+import time
+
 # Import and initialize the pygame library
 import pygame
 pygame.init()
@@ -15,6 +17,7 @@ class PydokuCell:
         self.editable = number == 0
         self.invalid = False
         self.selected = False
+        self.underConsideration = False
 
 
 class PydokuGUI:
@@ -22,6 +25,7 @@ class PydokuGUI:
     # colors that are used
     COLOR_BLACK = (0, 0, 0)
     COLOR_RED = (255, 0, 0)
+    COLOR_ORANGE = (255, 165, 0)
     COLOR_GREY = (105, 105, 105)
     COLOR_WHITE = (255, 255, 255)
     COLOR_GREEN = (0, 255, 0)
@@ -87,6 +91,7 @@ class PydokuGUI:
     def drawBoard(self):
         self.drawLines()
         self.drawNumbers()
+        pygame.display.flip()
 
     def drawLines(self):
         # Fill the background
@@ -134,6 +139,11 @@ class PydokuGUI:
                     self.markSquare(cellCenterX,
                                     cellCenterY,
                                     color)
+
+                if cell.underConsideration:
+                    self.markSquare(cellCenterX,
+                                    cellCenterY,
+                                    self.COLOR_ORANGE)
 
     def drawNumber(self, number, centerX, centerY, color):
         text = font.render(str(number),
@@ -275,28 +285,43 @@ class PydokuGUI:
 
         if currentCell.number != 0:
             if column == lastColumn and row == lastRow:
+                currentCell.underConsideration = False
                 return True
             elif column == lastColumn:
+                currentCell.underConsideration = False
                 return self.solveSudokuHelper(row + 1, 0)
             else:
+                currentCell.underConsideration = False
                 return self.solveSudokuHelper(row, column + 1)
 
+        currentCell.underConsideration = True
+
         for candidateNumber in range(1, 10):
+            currentCell.number = candidateNumber
+            self.drawBoard()
+            time.sleep(0.1)
             if self.isValid(candidateNumber, row, column):
-                currentCell.number = candidateNumber
 
                 if column == lastColumn and row == lastRow:
+                    currentCell.underConsideration = False
                     return True
                 elif column == lastColumn:
+                    currentCell.underConsideration = False
                     result = self.solveSudokuHelper(row + 1, 0)
                 else:
+                    currentCell.underConsideration = False
                     result = self.solveSudokuHelper(row, column + 1)
 
                 if result:
+                    currentCell.underConsideration = False
                     return True
 
+            currentCell.underConsideration = True
+            self.drawBoard()
+            time.sleep(0.1)
             currentCell.number = 0
 
+        currentCell.underConsideration = False
         return False
 
     def isValid(self, number, row, column):
@@ -360,9 +385,6 @@ while running:
 
         if event.type == pygame.QUIT:
             running = False
-
-    # Flip the display
-    pygame.display.flip()
 
 # Done! Time to quit.
 pygame.quit()
