@@ -262,6 +262,63 @@ class PydokuGUI:
                         cell.invalid = invalid
                         currentCell.invalid = invalid
 
+    def solveSudoku(self):
+        self.solveSudokuHelper(0, 0)
+
+    def solveSudokuHelper(self, row, column):
+        lastColumn = len(self.board[row]) - 1
+        lastRow = len(self.board) - 1
+
+        currentCell = self.board[row][column]
+        cellCenterY = self.cellCenters[row]
+        cellCenterX = self.cellCenters[column]
+
+        if currentCell.number != 0:
+            if column == lastColumn and row == lastRow:
+                return True
+            elif column == lastColumn:
+                return self.solveSudokuHelper(row + 1, 0)
+            else:
+                return self.solveSudokuHelper(row, column + 1)
+
+        for candidateNumber in range(1, 10):
+            if self.isValid(candidateNumber, row, column):
+                currentCell.number = candidateNumber
+
+                if column == lastColumn and row == lastRow:
+                    return True
+                elif column == lastColumn:
+                    result = self.solveSudokuHelper(row + 1, 0)
+                else:
+                    result = self.solveSudokuHelper(row, column + 1)
+
+                if result:
+                    return True
+
+            currentCell.number = 0
+
+        return False
+
+    def isValid(self, number, row, column):
+        for boardRow in range(9):
+            if self.board[boardRow][column].number == number and boardRow != row:
+                return False
+
+        for boardColumn in range(9):
+            if self.board[row][boardColumn].number == number and boardColumn != column:
+                return False
+
+        squareStartRow = (row // 3) * 3
+        squareStartColumn = (column // 3) * 3
+
+        for boardRow in range(squareStartRow, squareStartRow + 3):
+            for boardColumn in range(squareStartColumn, squareStartColumn + 3):
+                if self.board[boardRow][boardColumn].number == number:
+                    if boardRow != row or boardColumn != column:
+                        return False
+
+        return True
+
 
 # Create a new Pydoku GUI
 pydoku = PydokuGUI()
@@ -291,6 +348,8 @@ while running:
                 pydoku.moveSelectedCell(0, 1)
             elif event.key == pygame.K_LEFT:
                 pydoku.moveSelectedCell(0, -1)
+            elif event.key == pygame.K_SPACE:
+                pydoku.solveSudoku()
             # Draw the actual board
             pydoku.drawBoard()
         if event.type == pygame.MOUSEBUTTONUP:
