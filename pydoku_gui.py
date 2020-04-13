@@ -322,12 +322,10 @@ class PydokuGUI:
         return False
 
     def isValid(self, number, row, column):
-        for boardRow in range(9):
-            if self.board[boardRow][column].number == number and boardRow != row:
+        for idx in range(9):
+            if self.board[idx][column].number == number and idx != row:
                 return False
-
-        for boardColumn in range(9):
-            if self.board[row][boardColumn].number == number and boardColumn != column:
+            if self.board[row][idx].number == number and idx != column:
                 return False
 
         squareStartRow = (row // 3) * 3
