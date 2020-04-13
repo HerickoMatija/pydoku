@@ -40,7 +40,10 @@ class PydokuGUI:
         self.screen = pygame.display.set_mode((self.WIDTH, self.WIDTH))
         pygame.display.set_caption('Pydoku GUI')
         self.selectedCell = None
-        self.board = [
+        self.board = self.getBoard()
+
+    def getBoard(self):
+        return [
             [
                 PydokuCell(0), PydokuCell(0), PydokuCell(9),
                 PydokuCell(2), PydokuCell(1), PydokuCell(8),
@@ -266,6 +269,7 @@ class PydokuGUI:
                     currentCell.invalid = invalid
 
     def solveSudoku(self):
+        self.board = self.getBoard()
         self.solveSudokuHelper(0, 0)
 
     def solveSudokuHelper(self, row, column):

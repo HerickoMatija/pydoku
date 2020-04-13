@@ -72,6 +72,16 @@ def isValid(number, row, column, board):
     return True
 
 
+def isSolved(board, solved):
+    for row in range(len(board)):
+        for column in range(len(board[row])):
+            if board[row][column] != solved[row][column]:
+                return False
+
+    return True
+
+
+# The sudoku puzzle that we are solving
 board = [
     [0, 0, 9, 2, 1, 8, 0, 0, 0],
     [1, 7, 0, 0, 9, 6, 8, 0, 0],
@@ -84,6 +94,7 @@ board = [
     [0, 9, 4, 8, 0, 0, 0, 1, 3],
 ]
 
+# The solution
 solved = [
     [3, 6, 9, 2, 1, 8, 7, 4, 5],
     [1, 7, 5, 4, 9, 6, 8, 3, 2],
@@ -96,17 +107,9 @@ solved = [
     [5, 9, 4, 8, 2, 7, 6, 1, 3]
 ]
 
+# Trigger the algorithm to solve the board
 solveSudoku(board)
+# Print the board to console
 printBoard(board)
-
-
-def isSolved(board, solved):
-    for row in range(len(board)):
-        for column in range(len(board[row])):
-            if board[row][column] != solved[row][column]:
-                return False
-
-    return True
-
-
+# Print the result if the algorithm solved it correctly
 print(isSolved(board, solved))
