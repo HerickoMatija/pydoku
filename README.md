@@ -20,4 +20,4 @@ once pygame is installed you can start the GUI version with
 
     python pydoku_gui.py
 
-Then you can play and try to solve it on your own or trigger the solving by pressing the SPACE key.
+Then you can play and try to solve it on your own or trigger the solving algorithm visualization by pressing the SPACE key.
