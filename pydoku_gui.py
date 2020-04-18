@@ -285,7 +285,8 @@ class PydokuGUI:
             if column == lastColumn and row == lastRow:
                 currentCell.underConsideration = False
                 return True
-            elif column == lastColumn:
+
+            if column == lastColumn:
                 currentCell.underConsideration = False
                 return self.solveSudokuHelper(row + 1, 0)
             else:
@@ -303,7 +304,8 @@ class PydokuGUI:
                 if column == lastColumn and row == lastRow:
                     currentCell.underConsideration = False
                     return True
-                elif column == lastColumn:
+
+                if column == lastColumn:
                     currentCell.underConsideration = False
                     result = self.solveSudokuHelper(row + 1, 0)
                 else:
@@ -334,9 +336,11 @@ class PydokuGUI:
 
         for boardRow in range(squareStartRow, squareStartRow + 3):
             for boardColumn in range(squareStartColumn, squareStartColumn + 3):
+                if boardRow == row and boardColumn == column:
+                    continue
+
                 if self.board[boardRow][boardColumn].number == number:
-                    if boardRow != row or boardColumn != column:
-                        return False
+                    return False
 
         return True
 

@@ -27,8 +27,9 @@ def solveSudokuHelper(board, row, column):
         # We are at the last cell so return True
         if column == lastColumn and row == lastRow:
             return True
+
         # Check if we are at the last cell in a row
-        elif column == lastColumn:
+        if column == lastColumn:
             return solveSudokuHelper(board, row + 1, 0)
         else:
             return solveSudokuHelper(board, row, column + 1)
@@ -44,8 +45,9 @@ def solveSudokuHelper(board, row, column):
             # Check if we reached the end
             if column == lastColumn and row == lastRow:
                 return True
+
             # Check if we are at the last cell in a row
-            elif column == lastColumn:
+            if column == lastColumn:
                 result = solveSudokuHelper(board, row + 1, 0)
             else:
                 result = solveSudokuHelper(board, row, column + 1)
