@@ -27,12 +27,11 @@ def solveSudokuHelper(board, row, column):
         # We are at the last cell so return True
         if column == lastColumn and row == lastRow:
             return True
+        # Check if we are at the last cell in a row
+        elif column == lastColumn:
+            return solveSudokuHelper(board, row + 1, 0)
         else:
-            # Check if we are at the last cell in a row
-            if column == lastColumn:
-                return solveSudokuHelper(board, row + 1, 0)
-            else:
-                return solveSudokuHelper(board, row, column + 1)
+            return solveSudokuHelper(board, row, column + 1)
 
     # Cell has no value so try to find a candidate
     for candidateNumber in range(1, 10):
@@ -45,12 +44,11 @@ def solveSudokuHelper(board, row, column):
             # Check if we reached the end
             if column == lastColumn and row == lastRow:
                 return True
+            # Check if we are at the last cell in a row
+            elif column == lastColumn:
+                result = solveSudokuHelper(board, row + 1, 0)
             else:
-                # Check if we are at the last cell in a row
-                if column == lastColumn:
-                    result = solveSudokuHelper(board, row + 1, 0)
-                else:
-                    result = solveSudokuHelper(board, row, column + 1)
+                result = solveSudokuHelper(board, row, column + 1)
 
             # If the recursion returns True we found a solution
             if result:

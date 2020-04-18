@@ -281,6 +281,7 @@ class PydokuGUI:
         cellCenterX = self.cellCenters[column]
 
         if currentCell.number != 0:
+
             if column == lastColumn and row == lastRow:
                 currentCell.underConsideration = False
                 return True
