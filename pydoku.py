@@ -77,9 +77,11 @@ def isValid(number, row, column, board):
     # Check if the same number is in the 3x3 square
     for boardRow in range(squareStartRow, squareStartRow + 3):
         for boardColumn in range(squareStartColumn, squareStartColumn + 3):
+            if boardRow == row and boardColumn == column:
+                continue
+
             if board[boardRow][boardColumn] == number:
-                if boardRow != row or boardColumn != column:
-                    return False
+                return False
 
     return True
 
