@@ -249,14 +249,11 @@ class PydokuGUI:
         if currentCell.number != 0:
 
             if columnIdx == lastColumnIdx and rowIdx == lastRowIdx:
-                currentCell.underConsideration = False
                 return True
 
             if columnIdx == lastColumnIdx:
-                currentCell.underConsideration = False
                 return self.solveSudokuHelper(rowIdx + 1, 0)
             else:
-                currentCell.underConsideration = False
                 return self.solveSudokuHelper(rowIdx, columnIdx + 1)
 
         currentCell.underConsideration = True
