@@ -25,7 +25,7 @@ class PydokuGUI:
     # colors that are used
     COLOR_BLACK = (0, 0, 0)
     COLOR_RED = (255, 0, 0)
-    COLOR_ORANGE = (255, 165, 0)
+    COLOR_GREEN = (0, 255, 0)
     COLOR_GREY = (105, 105, 105)
     COLOR_WHITE = (255, 255, 255)
     COLOR_GREEN = (0, 255, 0)
@@ -151,7 +151,7 @@ class PydokuGUI:
                     self.colorCellBorder(rowIdx, columnIdx, self.COLOR_RED)
 
                 if cell.underConsideration:
-                    self.colorCellBorder(rowIdx, columnIdx, self.COLOR_ORANGE)
+                    self.colorCellBorder(rowIdx, columnIdx, self.COLOR_GREEN)
 
     def drawNumber(self, number, rowIdx, columnIdx, color):
         text = font.render(str(number),
