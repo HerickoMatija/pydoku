@@ -91,8 +91,8 @@ class PydokuGUI:
         ]
 
     def drawBoard(self):
-        self.drawLines()
         self.validateBoard()
+        self.drawLines()
         self.drawNumbers()
         pygame.display.flip()
 
@@ -247,8 +247,7 @@ class PydokuGUI:
 
             if columnIdx == lastColumnIdx and rowIdx == lastRowIdx:
                 return True
-
-            if columnIdx == lastColumnIdx:
+            elif columnIdx == lastColumnIdx:
                 return self.solveSudokuHelper(rowIdx + 1, 0)
             else:
                 return self.solveSudokuHelper(rowIdx, columnIdx + 1)
