@@ -25,11 +25,10 @@ class PydokuGUI:
     # colors that are used
     COLOR_BLACK = (0, 0, 0)
     COLOR_RED = (255, 0, 0)
-    COLOR_GREEN = (0, 255, 0)
     COLOR_GREY = (105, 105, 105)
     COLOR_WHITE = (255, 255, 255)
     COLOR_GREEN = (0, 255, 0)
-    COLOR_LIGHT_BLUE = (0, 180, 255)
+    COLOR_BLUE = (0, 180, 255)
 
     # Static width calculation based on 9 cells, 6 normal lines and 2 thicker lines
     WIDTH = 9 * 39 + 6 * 1 + 2 * 3
@@ -143,15 +142,12 @@ class PydokuGUI:
                     color = self.COLOR_GREY if cell.editable else self.COLOR_BLACK
                     self.drawNumber(cell.number, rowIdx, columnIdx, color)
 
-                if cell.selected:
-                    self.colorCellBorder(
-                        rowIdx, columnIdx, self.COLOR_LIGHT_BLUE)
-
-                if not cell.valid:
-                    self.colorCellBorder(rowIdx, columnIdx, self.COLOR_RED)
-
                 if cell.underConsideration:
                     self.colorCellBorder(rowIdx, columnIdx, self.COLOR_GREEN)
+                elif not cell.valid:
+                    self.colorCellBorder(rowIdx, columnIdx, self.COLOR_RED)
+                elif cell.selected:
+                    self.colorCellBorder(rowIdx, columnIdx, self.COLOR_BLUE)
 
     def drawNumber(self, number, rowIdx, columnIdx, color):
         text = font.render(str(number),
@@ -161,9 +157,10 @@ class PydokuGUI:
 
         textRect = text.get_rect()
 
-        # set the center of the rectangular object.
-        textRect.center = (
-            self.cellCenters[columnIdx], self.cellCenters[rowIdx])
+        rowCenter = self.cellCenters[rowIdx]
+        columnCenter = self.cellCenters[columnIdx]
+
+        textRect.center = (columnCenter, rowCenter)
 
         self.screen.blit(text, textRect)
 
