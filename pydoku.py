@@ -18,69 +18,69 @@ def solveSudoku(board):
     solveSudokuHelper(board, 0, 0)
 
 
-def solveSudokuHelper(board, row, column):
-    lastColumn = len(board[row]) - 1
-    lastRow = len(board) - 1
+def solveSudokuHelper(board, rowIdx, columnIdx):
+    lastColumnIdx = len(board[rowIdx]) - 1
+    lastRowIdx = len(board) - 1
 
     # We check if the cell already has a value
-    if board[row][column] != 0:
+    if board[rowIdx][columnIdx] != 0:
         # We are at the last cell so return True
-        if column == lastColumn and row == lastRow:
+        if columnIdx == lastColumnIdx and rowIdx == lastRowIdx:
             return True
 
         # Check if we are at the last cell in a row
-        if column == lastColumn:
-            return solveSudokuHelper(board, row + 1, 0)
+        if columnIdx == lastColumnIdx:
+            return solveSudokuHelper(board, rowIdx + 1, 0)
         else:
-            return solveSudokuHelper(board, row, column + 1)
+            return solveSudokuHelper(board, rowIdx, columnIdx + 1)
 
     # Cell has no value so try to find a candidate
     for candidateNumber in range(1, 10):
         # Check if the candidate number is valid in this cell
-        if isValid(candidateNumber, row, column, board):
+        if isValid(candidateNumber, rowIdx, columnIdx, board):
 
             # Set the candidate number
-            board[row][column] = candidateNumber
+            board[rowIdx][columnIdx] = candidateNumber
 
             # Check if we reached the end
-            if column == lastColumn and row == lastRow:
+            if columnIdx == lastColumnIdx and rowIdx == lastRowIdx:
                 return True
 
             # Check if we are at the last cell in a row
-            if column == lastColumn:
-                result = solveSudokuHelper(board, row + 1, 0)
+            if columnIdx == lastColumnIdx:
+                result = solveSudokuHelper(board, rowIdx + 1, 0)
             else:
-                result = solveSudokuHelper(board, row, column + 1)
+                result = solveSudokuHelper(board, rowIdx, columnIdx + 1)
 
             # If the recursion returns True we found a solution
             if result:
                 return True
 
             # Otherwise reset the cell
-            board[row][column] = 0
+            board[rowIdx][columnIdx] = 0
 
     return False
 
 
-def isValid(number, row, column, board):
+def isValid(number, rowIdx, columnIdx, board):
     # Check if the same number is in the row or column
     for idx in range(9):
-        if board[idx][column] == number and idx != row:
+        if board[idx][columnIdx] == number and idx != rowIdx:
             return False
-        if board[row][idx] == number and idx != column:
+        if board[rowIdx][idx] == number and idx != columnIdx:
             return False
 
     # Find the starting cell of the 3x3 square
-    squareStartRow = (row // 3) * 3
-    squareStartColumn = (column // 3) * 3
+    squareStartRowIdx = (rowIdx // 3) * 3
+    squareStartColumnIdx = (columnIdx // 3) * 3
 
     # Check if the same number is in the 3x3 square
-    for boardRow in range(squareStartRow, squareStartRow + 3):
-        for boardColumn in range(squareStartColumn, squareStartColumn + 3):
-            if boardRow == row and boardColumn == column:
+    for boardRowIdx in range(squareStartRowIdx, squareStartRowIdx + 3):
+        for boardColumnIdx in range(squareStartColumnIdx, squareStartColumnIdx + 3):
+            if boardRowIdx == rowIdx and boardColumnIdx == columnIdx:
                 continue
 
-            if board[boardRow][boardColumn] == number:
+            if board[boardRowIdx][boardColumnIdx] == number:
                 return False
 
     return True

@@ -123,23 +123,23 @@ class PydokuGUI:
 
     def drawNumbers(self):
         # Go through the board and draw the numbers into the cells
-        for row in range(len(self.board)):
-            for column in range(len(self.board[row])):
+        for rowIdx in range(len(self.board)):
+            for columnIdx in range(len(self.board[rowIdx])):
 
-                cell = self.board[row][column]
+                cell = self.board[rowIdx][columnIdx]
 
                 if cell.number != 0:
                     color = self.COLOR_GREY if cell.editable else self.COLOR_BLACK
-                    self.drawNumber(cell.number, row, column, color)
+                    self.drawNumber(cell.number, rowIdx, columnIdx, color)
 
                 if cell.selected or cell.invalid:
                     color = self.COLOR_RED if cell.invalid else self.COLOR_LIGHT_BLUE
-                    self.colorCellBorder(row, column, color)
+                    self.colorCellBorder(rowIdx, columnIdx, color)
 
                 if cell.underConsideration:
-                    self.colorCellBorder(row, column, self.COLOR_ORANGE)
+                    self.colorCellBorder(rowIdx, columnIdx, self.COLOR_ORANGE)
 
-    def drawNumber(self, number, row, column, color):
+    def drawNumber(self, number, rowIdx, columnIdx, color):
         text = font.render(str(number),
                            True,
                            color,
@@ -148,13 +148,14 @@ class PydokuGUI:
         textRect = text.get_rect()
 
         # set the center of the rectangular object.
-        textRect.center = (self.cellCenters[column], self.cellCenters[row])
+        textRect.center = (
+            self.cellCenters[columnIdx], self.cellCenters[rowIdx])
 
         self.screen.blit(text, textRect)
 
-    def colorCellBorder(self, row, column, color):
-        rowCenter = self.cellCenters[row]
-        columnCenter = self.cellCenters[column]
+    def colorCellBorder(self, rowIdx, columnIdx, color):
+        rowCenter = self.cellCenters[rowIdx]
+        columnCenter = self.cellCenters[columnIdx]
 
         self.drawLine((columnCenter - 20, rowCenter - 20),
                       (columnCenter + 20, rowCenter - 20),
@@ -173,15 +174,15 @@ class PydokuGUI:
                       color)
 
     def setSelectedCell(self, mouseClickPosition):
-        clickedColumn = self.getCellFromCoord(mouseClickPosition[0])
-        clickedRow = self.getCellFromCoord(mouseClickPosition[1])
+        clickedColumnIdx = self.getCellFromCoord(mouseClickPosition[0])
+        clickedRowIdx = self.getCellFromCoord(mouseClickPosition[1])
 
         if self.selectedCell is not None:
-            row, column = self.selectedCell
-            self.board[row][column].selected = False
+            rowIdx, columnIdx = self.selectedCell
+            self.board[rowIdx][columnIdx].selected = False
 
-        self.selectedCell = (clickedRow, clickedColumn)
-        self.board[clickedRow][clickedColumn].selected = True
+        self.selectedCell = (clickedRowIdx, clickedColumnIdx)
+        self.board[clickedRowIdx][clickedColumnIdx].selected = True
 
     def getCellFromCoord(self, coordinate):
         for idx, cellCenter in enumerate(self.cellCenters):
@@ -194,8 +195,8 @@ class PydokuGUI:
         if self.selectedCell is None:
             return
 
-        row, column = self.selectedCell
-        cell = self.board[row][column]
+        rowIdx, columnIdx = self.selectedCell
+        cell = self.board[rowIdx][columnIdx]
 
         if cell.editable:
             self.resetValidation()
@@ -212,59 +213,61 @@ class PydokuGUI:
         if self.selectedCell is None:
             return
 
-        oldRow, oldColumn = self.selectedCell
+        oldRowIdx, oldColumnIdx = self.selectedCell
 
-        newRow = oldRow + rowMove
-        newColumn = oldColumn + columnMove
+        newRowIdx = oldRowIdx + rowMove
+        newColumnIdx = oldColumnIdx + columnMove
 
-        if -1 < newRow and newRow < 9 and -1 < newColumn and newColumn < 9:
-            self.selectedCell = (newRow, newColumn)
-            self.board[oldRow][oldColumn].selected = False
-            self.board[newRow][newColumn].selected = True
+        if -1 < newRowIdx and newRowIdx < 9 and -1 < newColumnIdx and newColumnIdx < 9:
+            self.selectedCell = (newRowIdx, newColumnIdx)
+            self.board[oldRowIdx][oldColumnIdx].selected = False
+            self.board[newRowIdx][newColumnIdx].selected = True
 
     def validateSelectedCellNumber(self):
         if self.selectedCell is None:
             return
 
-        selectedRow, selectedColumn = self.selectedCell
-        self.traverseSignificantCellsAndSetInvalidTo(selectedRow,
-                                                     selectedColumn,
+        selectedRowIdx, selectedColumnIdx = self.selectedCell
+        self.traverseSignificantCellsAndSetInvalidTo(selectedRowIdx,
+                                                     selectedColumnIdx,
                                                      True)
 
     def resetValidation(self):
         if self.selectedCell is None:
             return
 
-        selectedRow, selectedColumn = self.selectedCell
-        self.traverseSignificantCellsAndSetInvalidTo(selectedRow,
-                                                     selectedColumn,
+        selectedRowIdx, selectedColumnIdx = self.selectedCell
+        self.traverseSignificantCellsAndSetInvalidTo(selectedRowIdx,
+                                                     selectedColumnIdx,
                                                      False)
 
-    def traverseSignificantCellsAndSetInvalidTo(self, row, column, invalid):
-        cell = self.board[row][column]
+    def traverseSignificantCellsAndSetInvalidTo(self, rowIdx, columnIdx, invalid):
+        cell = self.board[rowIdx][columnIdx]
 
         for idx in range(9):
-            currentCell = self.board[idx][column]
+            currentCell = self.board[idx][columnIdx]
 
-            if currentCell.number == cell.number and row != idx:
+            if currentCell.number == cell.number and rowIdx != idx:
                 cell.invalid = invalid
                 currentCell.invalid = invalid
 
-            currentCell = self.board[row][idx]
+            currentCell = self.board[rowIdx][idx]
 
-            if currentCell.number == cell.number and column != idx:
+            if currentCell.number == cell.number and columnIdx != idx:
                 cell.invalid = invalid
                 currentCell.invalid = invalid
 
-        startingRow = (row // 3) * 3
-        startingColumn = (column // 3) * 3
+        startingRowIdx = (rowIdx // 3) * 3
+        startingColumnIdx = (columnIdx // 3) * 3
 
-        for currentRow in range(startingRow, startingRow + 3):
-            for currentColumn in range(startingColumn, startingColumn + 3):
+        for currentRowIdx in range(startingRowIdx, startingRowIdx + 3):
+            for currentColumnIdx in range(startingColumnIdx, startingColumnIdx + 3):
+                if rowIdx == currentRowIdx and columnIdx == currentColumnIdx:
+                    continue
 
-                currentCell = self.board[currentRow][currentColumn]
+                currentCell = self.board[currentRowIdx][currentColumnIdx]
 
-                if currentCell.number == cell.number and row != currentRow and column != currentColumn:
+                if currentCell.number == cell.number:
                     cell.invalid = invalid
                     currentCell.invalid = invalid
 
@@ -272,26 +275,26 @@ class PydokuGUI:
         self.board = self.getBoard()
         self.solveSudokuHelper(0, 0)
 
-    def solveSudokuHelper(self, row, column):
-        lastColumn = len(self.board[row]) - 1
-        lastRow = len(self.board) - 1
+    def solveSudokuHelper(self, rowIdx, columnIdx):
+        lastColumnIdx = len(self.board[rowIdx]) - 1
+        lastRowIdx = len(self.board) - 1
 
-        currentCell = self.board[row][column]
-        cellCenterY = self.cellCenters[row]
-        cellCenterX = self.cellCenters[column]
+        currentCell = self.board[rowIdx][columnIdx]
+        cellCenterY = self.cellCenters[rowIdx]
+        cellCenterX = self.cellCenters[columnIdx]
 
         if currentCell.number != 0:
 
-            if column == lastColumn and row == lastRow:
+            if columnIdx == lastColumnIdx and rowIdx == lastRowIdx:
                 currentCell.underConsideration = False
                 return True
 
-            if column == lastColumn:
+            if columnIdx == lastColumnIdx:
                 currentCell.underConsideration = False
-                return self.solveSudokuHelper(row + 1, 0)
+                return self.solveSudokuHelper(rowIdx + 1, 0)
             else:
                 currentCell.underConsideration = False
-                return self.solveSudokuHelper(row, column + 1)
+                return self.solveSudokuHelper(rowIdx, columnIdx + 1)
 
         currentCell.underConsideration = True
 
@@ -299,18 +302,18 @@ class PydokuGUI:
             currentCell.number = candidateNumber
             self.drawBoard()
             time.sleep(0.02)
-            if self.isValid(candidateNumber, row, column):
+            if self.isValid(candidateNumber, rowIdx, columnIdx):
 
-                if column == lastColumn and row == lastRow:
+                if columnIdx == lastColumnIdx and rowIdx == lastRowIdx:
                     currentCell.underConsideration = False
                     return True
 
-                if column == lastColumn:
+                if columnIdx == lastColumnIdx:
                     currentCell.underConsideration = False
-                    result = self.solveSudokuHelper(row + 1, 0)
+                    result = self.solveSudokuHelper(rowIdx + 1, 0)
                 else:
                     currentCell.underConsideration = False
-                    result = self.solveSudokuHelper(row, column + 1)
+                    result = self.solveSudokuHelper(rowIdx, columnIdx + 1)
 
                 if result:
                     currentCell.underConsideration = False
@@ -324,22 +327,22 @@ class PydokuGUI:
         currentCell.underConsideration = False
         return False
 
-    def isValid(self, number, row, column):
+    def isValid(self, number, rowIdx, columnIdx):
         for idx in range(9):
-            if self.board[idx][column].number == number and idx != row:
+            if self.board[idx][columnIdx].number == number and idx != rowIdx:
                 return False
-            if self.board[row][idx].number == number and idx != column:
+            if self.board[rowIdx][idx].number == number and idx != columnIdx:
                 return False
 
-        squareStartRow = (row // 3) * 3
-        squareStartColumn = (column // 3) * 3
+        squareStartRowIdx = (rowIdx // 3) * 3
+        squareStartColumnIdx = (columnIdx // 3) * 3
 
-        for boardRow in range(squareStartRow, squareStartRow + 3):
-            for boardColumn in range(squareStartColumn, squareStartColumn + 3):
-                if boardRow == row and boardColumn == column:
+        for boardRowIdx in range(squareStartRowIdx, squareStartRowIdx + 3):
+            for boardColumnIdx in range(squareStartColumnIdx, squareStartColumnIdx + 3):
+                if boardRowIdx == rowIdx and boardColumnIdx == columnIdx:
                     continue
 
-                if self.board[boardRow][boardColumn].number == number:
+                if self.board[boardRowIdx][boardColumnIdx].number == number:
                     return False
 
         return True
