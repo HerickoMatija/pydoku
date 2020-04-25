@@ -15,7 +15,7 @@ class PydokuCell:
     def __init__(self, number):
         self.number = number
         self.editable = number == 0
-        self.invalid = False
+        self.valid = True
         self.selected = False
         self.underConsideration = False
 
@@ -93,6 +93,7 @@ class PydokuGUI:
 
     def drawBoard(self):
         self.drawLines()
+        self.validateBoard()
         self.drawNumbers()
         pygame.display.flip()
 
@@ -121,6 +122,16 @@ class PydokuGUI:
     def drawLine(self, startPoint, endPoint, color):
         pygame.draw.line(self.screen, color, startPoint, endPoint)
 
+    def validateBoard(self):
+        for rowIdx in range(9):
+            for columnIdx in range(9):
+                cell = self.board[rowIdx][columnIdx]
+
+                if cell.number == 0:
+                    cell.valid = True
+                else:
+                    cell.valid = self.isValid(cell.number, rowIdx, columnIdx)
+
     def drawNumbers(self):
         # Go through the board and draw the numbers into the cells
         for rowIdx in range(len(self.board)):
@@ -132,9 +143,12 @@ class PydokuGUI:
                     color = self.COLOR_GREY if cell.editable else self.COLOR_BLACK
                     self.drawNumber(cell.number, rowIdx, columnIdx, color)
 
-                if cell.selected or cell.invalid:
-                    color = self.COLOR_RED if cell.invalid else self.COLOR_LIGHT_BLUE
-                    self.colorCellBorder(rowIdx, columnIdx, color)
+                if cell.selected:
+                    self.colorCellBorder(
+                        rowIdx, columnIdx, self.COLOR_LIGHT_BLUE)
+
+                if not cell.valid:
+                    self.colorCellBorder(rowIdx, columnIdx, self.COLOR_RED)
 
                 if cell.underConsideration:
                     self.colorCellBorder(rowIdx, columnIdx, self.COLOR_ORANGE)
@@ -199,10 +213,7 @@ class PydokuGUI:
         cell = self.board[rowIdx][columnIdx]
 
         if cell.editable:
-            self.resetValidation()
             cell.number = number
-            if number != 0:
-                self.validateSelectedCellNumber()
 
     def delete(self):
         if self.selectedCell is None:
@@ -222,54 +233,6 @@ class PydokuGUI:
             self.selectedCell = (newRowIdx, newColumnIdx)
             self.board[oldRowIdx][oldColumnIdx].selected = False
             self.board[newRowIdx][newColumnIdx].selected = True
-
-    def validateSelectedCellNumber(self):
-        if self.selectedCell is None:
-            return
-
-        selectedRowIdx, selectedColumnIdx = self.selectedCell
-        self.traverseSignificantCellsAndSetInvalidTo(selectedRowIdx,
-                                                     selectedColumnIdx,
-                                                     True)
-
-    def resetValidation(self):
-        if self.selectedCell is None:
-            return
-
-        selectedRowIdx, selectedColumnIdx = self.selectedCell
-        self.traverseSignificantCellsAndSetInvalidTo(selectedRowIdx,
-                                                     selectedColumnIdx,
-                                                     False)
-
-    def traverseSignificantCellsAndSetInvalidTo(self, rowIdx, columnIdx, invalid):
-        cell = self.board[rowIdx][columnIdx]
-
-        for idx in range(9):
-            currentCell = self.board[idx][columnIdx]
-
-            if currentCell.number == cell.number and rowIdx != idx:
-                cell.invalid = invalid
-                currentCell.invalid = invalid
-
-            currentCell = self.board[rowIdx][idx]
-
-            if currentCell.number == cell.number and columnIdx != idx:
-                cell.invalid = invalid
-                currentCell.invalid = invalid
-
-        startingRowIdx = (rowIdx // 3) * 3
-        startingColumnIdx = (columnIdx // 3) * 3
-
-        for currentRowIdx in range(startingRowIdx, startingRowIdx + 3):
-            for currentColumnIdx in range(startingColumnIdx, startingColumnIdx + 3):
-                if rowIdx == currentRowIdx and columnIdx == currentColumnIdx:
-                    continue
-
-                currentCell = self.board[currentRowIdx][currentColumnIdx]
-
-                if currentCell.number == cell.number:
-                    cell.invalid = invalid
-                    currentCell.invalid = invalid
 
     def solveSudoku(self):
         self.board = self.getBoard()
